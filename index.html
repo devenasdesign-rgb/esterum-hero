@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESTÉRUM — Атмосфера в деталях</title>
+<meta name="description" content="ESTÉRUM — ароматические свечи из соевого воска с натуральными минералами. Коллекция «Четыре состояния».">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.className = "js";</script>
+</head>
+<body>
+
+<a class="skip" href="#hero">К содержимому</a>
+
+<div class="frame">
+
+<header class="header" id="top">
+  <div class="header-in reveal">
+    <a class="wordmark" href="#top" aria-label="ESTÉRUM, на главную">ESTÉRUM</a>
+
+    <nav class="nav" aria-label="Основная навигация">
+      <div class="nav-item has-sub">
+        <a href="#" aria-haspopup="true" aria-expanded="false">Коллекция</a>
+        <div class="submenu" role="menu">
+          <a role="menuitem" href="#">Свечи с минералами</a>
+          <a role="menuitem" href="#">Подарочные наборы</a>
+          <a role="menuitem" class="soon" href="#">Диффузоры<i>скоро</i></a>
+          <a role="menuitem" class="soon" href="#">Арома-саше<i>скоро</i></a>
+        </div>
+      </div>
+      <a href="#">Подарки</a>
+      <a href="#">О бренде</a>
+      <a href="#">Доставка и оплата</a>
+      <a href="#">Контакты</a>
+    </nav>
+
+    <div class="tools">
+      <form class="search" role="search" onsubmit="return false">
+        <label class="sr-only" for="q">Поиск по каталогу</label>
+        <input id="q" type="search" placeholder="Поиск" autocomplete="off">
+      </form>
+      <a class="tool" href="#">Избранное <span class="count" data-fav>(0)</span></a>
+      <a class="tool" href="#">Корзина <span class="count" data-cart>(0)</span></a>
+    </div>
+
+    <button class="burger" type="button" aria-label="Меню" aria-expanded="false">Меню</button>
+  </div>
+
+  <div class="mobile-menu" hidden>
+    <a href="#">Поиск</a>
+    <a href="#">Коллекция</a>
+    <a href="#">Подарки</a>
+    <a href="#">О бренде</a>
+    <a href="#">Доставка и оплата</a>
+    <a href="#">Контакты</a>
+    <a href="#">Избранное <span class="count" data-fav>(0)</span></a>
+  </div>
+</header>
+
+<main class="hero" id="hero">
+  <section class="copy">
+    <p class="eyebrow reveal"><span class="tick" aria-hidden="true"></span><span class="eyebrow-t">Коллекция «Четыре состояния»</span></p>
+
+    <h1 class="title"><span class="ln"><span>Атмосфера</span></span><span class="ln"><span>в деталях</span></span></h1>
+
+    <p class="lede reveal">Соевые свечи с натуральными минералами: ровный тёплый свет, аромат, который не спорит с комнатой, и камень, остающийся с вами, когда свеча догорает.</p>
+
+    <div class="actions reveal">
+      <a class="btn" href="#"><i>Открыть коллекцию</i><i class="arrow" aria-hidden="true">→</i></a>
+      <a class="quiet" href="#">Наша история</a>
+    </div>
+
+    <p class="specs reveal">Соевый воск · 200 мл · 35—40 часов · гипсовый сосуд ручной формовки</p>
+  </section>
+
+  <section class="gallery" aria-roledescription="карусель" aria-label="Коллекция «Четыре состояния»">
+    <div class="stage">
+      <div class="stage-img">
+        <img id="stage-a" class="is-front" src="images/amethyst.jpg" alt="Свеча ESTÉRUM с натуральным аметистом и подарочная коробка">
+        <img id="stage-b" alt="" aria-hidden="true">
+      </div>
+      <p class="caption reveal" aria-live="polite"><span class="cap-t">Аметист · Покой</span></p>
+    </div>
+
+    <div class="thumbs" role="tablist" aria-label="Выбор свечи"></div>
+
+    <div class="dots reveal" role="tablist" aria-label="Слайды коллекции"></div>
+  </section>
+</main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
