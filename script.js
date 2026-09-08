@@ -14,8 +14,8 @@
 
   var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var layerA   = document.getElementById('stage-a');
-  var layerB   = document.getElementById('stage-b');
+  var layerA   = document.getElementById('layer-a');
+  var layerB   = document.getElementById('layer-b');
   var caption  = document.querySelector('.caption');
   var capText  = caption.querySelector('.cap-t');
   var thumbsEl = document.querySelector('.thumbs');
@@ -93,8 +93,9 @@
 
     var s = STATES[index];
 
-    back.src = 'images/' + s.key + '.jpg';
-    back.alt = alt(s);
+    var backImg = back.querySelector('img');
+    backImg.src = 'images/' + s.key + '.jpg';
+    backImg.alt = alt(s);
 
     caption.classList.add('out');
 
@@ -115,19 +116,28 @@
     };
 
     var reveal = function () {
+      var leaving = front;
+      leaving.classList.remove('is-front');
+      leaving.classList.add('under');          // остаётся под новым слоем, пока идёт шторка
+      leaving.querySelector('img').setAttribute('aria-hidden', 'true');
+
       back.classList.add('is-front');
-      back.removeAttribute('aria-hidden');
-      front.classList.remove('is-front');
-      front.setAttribute('aria-hidden', 'true');
+      backImg.removeAttribute('aria-hidden');
+
       var t = front; front = back; back = t;   // слои меняются ролями
 
-      if (calm) { swapCaption(); finish(); return; }
-      setTimeout(swapCaption, 430);
-      setTimeout(finish, 900);
+      if (calm) {
+        leaving.classList.remove('under');
+        swapCaption(); finish();
+        return;
+      }
+      setTimeout(swapCaption, 520);
+      setTimeout(function () { leaving.classList.remove('under'); }, 1200);
+      setTimeout(finish, 1200);
     };
 
-    if (back.complete && back.naturalWidth) reveal();
-    else back.addEventListener('load', reveal, { once: true });
+    if (backImg.complete && backImg.naturalWidth) reveal();
+    else backImg.addEventListener('load', reveal, { once: true });
   }
 
   function next() { go((current + 1) % STATES.length, false); }
@@ -137,10 +147,12 @@
   function start() {
     if (calm) return;
     stop();
+    dotsEl.classList.remove('paused');
     timer = setTimeout(next, AUTOPLAY);
   }
   function stop() {
     if (timer) { clearTimeout(timer); timer = null; }
+    dotsEl.classList.add('paused');
   }
 
   var gallery = document.querySelector('.gallery');
@@ -198,13 +210,66 @@
     l.style.setProperty('--d', (0.16 + i * 0.08) + 's');
   });
 
+  /* ------------------------- параллакс кадра --------------------------- */
+
+  var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (fine && !calm) {
+    gallery.addEventListener('mousemove', function (e) {
+      var r = gallery.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width * 2 - 1;      // -1 … 1
+      var py = (e.clientY - r.top) / r.height * 2 - 1;
+      gallery.style.setProperty('--px', px.toFixed(3));
+      gallery.style.setProperty('--py', py.toFixed(3));
+    });
+    gallery.addEventListener('mouseleave', function () {
+      gallery.style.setProperty('--px', 0);
+      gallery.style.setProperty('--py', 0);
+    });
+  }
+
+  /* --------------------------- магнитная кнопка ------------------------ */
+
+  var cta = document.querySelector('.btn');
+  if (cta && fine && !calm) {
+    var PULL = 7;
+    cta.addEventListener('mousemove', function (e) {
+      var r = cta.getBoundingClientRect();
+      cta.style.setProperty('--mx', (((e.clientX - r.left) / r.width * 2 - 1) * PULL).toFixed(1) + 'px');
+      cta.style.setProperty('--my', (((e.clientY - r.top) / r.height * 2 - 1) * PULL * 0.5).toFixed(1) + 'px');
+    });
+    cta.addEventListener('mouseleave', function () {
+      cta.style.setProperty('--mx', '0px');
+      cta.style.setProperty('--my', '0px');
+    });
+  }
+
+  /* ------------------------------ заставка ----------------------------- */
+
   renderThumbs();
   renderDots();
 
-  requestAnimationFrame(function () {
-    requestAnimationFrame(function () {
+  var curtain = document.querySelector('.curtain');
+  var seen = false;
+  try { seen = sessionStorage.getItem('esterum-intro') === '1'; } catch (err) { seen = false; }
+
+  function openPage(delay) {
+    setTimeout(function () {
       document.documentElement.classList.add('ready');
       start();
-    });
-  });
+    }, delay);
+  }
+
+  if (!curtain || calm || seen) {
+    if (curtain) curtain.remove();
+    requestAnimationFrame(function () { requestAnimationFrame(function () { openPage(0); }); });
+  } else {
+    try { sessionStorage.setItem('esterum-intro', '1'); } catch (err) {}
+    requestAnimationFrame(function () { curtain.classList.add('on'); });
+    setTimeout(function () {
+      curtain.classList.add('lift');
+      openPage(180);                                  // содержимое встаёт следом за занавесом
+      setTimeout(function () { curtain.remove(); }, 1100);
+    }, 900);
+  }
 })();

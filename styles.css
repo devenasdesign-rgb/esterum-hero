@@ -45,6 +45,32 @@ a { color: inherit; text-decoration: none; }
 img { display: block; max-width: 100%; }
 :focus-visible { outline: 1px solid var(--muted); outline-offset: calc(4 * var(--u)); }
 
+/* заставка: снимается сама, один раз за сессию */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  transform: translateY(0);
+  transition: transform 1s cubic-bezier(.76, 0, .24, 1);
+}
+.curtain span {
+  font-family: "Prata", Georgia, serif;
+  font-size: calc(26 * var(--u));
+  letter-spacing: .42em;
+  text-indent: .42em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  opacity: 0;
+  transform: translateY(calc(8 * var(--u)));
+  transition: opacity .7s ease, transform .9s var(--easing);
+}
+.curtain.on span { opacity: 1; transform: none; }
+.curtain.lift { transform: translateY(-100%); }
+.curtain.lift span { opacity: 0; transition: opacity .35s ease; }
+
 /* полотно: во всю ширину экрана с полями 60 px, высота — 900 модулей макета */
 .frame {
   width: 100%;
@@ -279,6 +305,8 @@ body.menu-open { overflow: hidden; }
   letter-spacing: .1em;
   text-transform: uppercase;
   white-space: nowrap;
+  transform: translate3d(var(--mx, 0px), var(--my, 0px), 0);
+  transition: transform .5s cubic-bezier(.16, .8, .3, 1);
 }
 .btn::before {
   content: "";
@@ -331,23 +359,33 @@ body.menu-open { overflow: hidden; }
   grid-column: 1;
   width: 100%;
   height: calc(671 * var(--u));
+  overflow: hidden;
 }
 .stage-img {
   position: absolute;
-  inset: 0;
+  inset: calc(-14 * var(--u));            /* запас, чтобы параллакс не оголял края */
   overflow: hidden;
   background: #E4DED4;
+  transform: translate3d(calc(var(--px, 0) * 10px), calc(var(--py, 0) * 10px), 0);
+  transition: transform .7s cubic-bezier(.16, .8, .3, 1);
 }
-.stage-img img {
+
+/* смена кадра: новый слой въезжает шторкой справа поверх прежнего */
+.layer {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  opacity: 0;
+  clip-path: inset(0 0 0 100%);
+  transition: clip-path 1.15s var(--easing), opacity .01s;
+}
+.layer.is-front { z-index: 2; opacity: 1; clip-path: inset(0 0 0 0); }
+.layer.under    { z-index: 1; opacity: 1; clip-path: inset(0 0 0 0); transition: none; }
+.layer img {
   width: 100%; height: 100%;
   object-fit: cover;
-  opacity: 0;
-  transition: opacity .85s var(--easing);
   animation: breathe 26s ease-in-out infinite alternate;
 }
-.stage-img img.is-front { opacity: 1; }
 @keyframes breathe {
   from { transform: scale(1); }
   to   { transform: scale(1.035); }
@@ -389,9 +427,10 @@ body.menu-open { overflow: hidden; }
 .thumb img {
   width: 100%; height: 100%;
   object-fit: cover;
+  transform: translate3d(calc(var(--px, 0) * 4px), calc(var(--py, 0) * 4px), 0) scale(var(--s, 1));
   transition: transform 1.1s var(--easing);
 }
-.thumb:hover img { transform: scale(1.055); }
+.thumb:hover img { --s: 1.06; }
 .thumb::after {
   content: "";
   position: absolute; inset: 0;
@@ -421,11 +460,26 @@ body.menu-open { overflow: hidden; }
 }
 .dot:hover { transform: scale(1.25); }
 .dot[aria-selected="true"] { background: var(--muted); }
+.dot::after {
+  content: "";
+  position: absolute;
+  inset: calc(-6 * var(--u));
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+.dot[aria-selected="true"]::after { animation: ring 6s linear infinite; }
+.dots.paused .dot::after { animation-play-state: paused; }
+@keyframes ring {
+  from { transform: scale(.45); opacity: .5; }
+  to   { transform: scale(1);   opacity: 0; }
+}
 
 /* ======================= появление при загрузке ====================== */
 
 .js .reveal { opacity: 0; }
-.js .title .ln > span { transform: translateY(108%); }
+.js .title .ln > span { transform: translateY(108%); filter: blur(6px); }
 .js .eyebrow .tick { width: 0; }
 .js .stage-img { clip-path: inset(0 0 0 100%); }
 .js .thumb { opacity: 0; transform: translateX(calc(18 * var(--u))); }
@@ -435,9 +489,10 @@ body.menu-open { overflow: hidden; }
   animation-delay: var(--d, 0s);
 }
 .ready .title .ln > span {
-  transition: transform 1.05s var(--easing);
+  transition: transform 1.05s var(--easing), filter 1.2s ease;
   transition-delay: var(--d, 0s);
   transform: none;
+  filter: blur(0);
 }
 .ready .eyebrow .tick {
   transition: width .9s var(--easing) .15s;
@@ -519,7 +574,10 @@ body.menu-open { overflow: hidden; }
     transition-duration: .01ms !important;
   }
   .js .reveal, .js .thumb { opacity: 1; transform: none; }
-  .js .title .ln > span { transform: none; }
+  .js .title .ln > span { transform: none; filter: none; }
+  .curtain { display: none; }
+  .layer { transition: none; }
+  .stage-img { transform: none; }
   .js .stage-img { clip-path: none; }
   .js .eyebrow .tick { width: calc(46 * var(--u)); }
 }
