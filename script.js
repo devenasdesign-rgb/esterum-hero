@@ -162,11 +162,20 @@
 
   var burger = document.querySelector('.burger');
   var menu = document.querySelector('.mobile-menu');
-  burger.addEventListener('click', function () {
-    var open = menu.hasAttribute('hidden');
+  function setMenu(open) {
     if (open) { menu.removeAttribute('hidden'); } else { menu.setAttribute('hidden', ''); }
+    document.body.classList.toggle('menu-open', open);   // фон не скроллится под меню
     burger.setAttribute('aria-expanded', String(open));
     burger.textContent = open ? 'Закрыть' : 'Меню';
+  }
+  burger.addEventListener('click', function () {
+    setMenu(menu.hasAttribute('hidden'));
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setMenu(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !menu.hasAttribute('hidden')) setMenu(false);
   });
 
   /* -------------------- появление первого экрана ----------------------- */

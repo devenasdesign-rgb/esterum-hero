@@ -181,16 +181,26 @@ img { display: block; max-width: 100%; }
   cursor: pointer;
 }
 
+/* меню открывается поверх экрана, не сдвигая содержимое */
 .mobile-menu {
   display: none;
-  gap: 16px;
-  padding: 6px 20px 22px;
-  border-bottom: 1px solid var(--line);
-  font-size: 15px;
+  position: fixed;
+  inset: 0;
+  z-index: 1;                  /* внутри шапки: ниже её строки, выше содержимого */
+  align-content: start;
+  gap: 24px;
+  padding: 84px 20px 40px;
+  background: var(--bg);
+  font-size: 18px;
   color: var(--nav);
-  animation: drop .4s var(--easing) both;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: veil .38s var(--easing) both;
 }
-@keyframes drop { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.mobile-menu a { padding-bottom: 2px; }
+@keyframes veil { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+
+body.menu-open { overflow: hidden; }
 
 /* =============================== hero =============================== */
 
@@ -457,7 +467,7 @@ img { display: block; max-width: 100%; }
   .frame { width: 100%; height: auto; }
 
   .mobile-menu { display: grid; }
-  .header-in { gap: 14px; padding: 18px 20px; }
+  .header-in { position: relative; z-index: 2; gap: 14px; padding: 18px 20px; }
   .nav { display: none; }
   .tools { gap: 14px; font-size: 13px; }
   .tools .search, .tools .tool:first-of-type { display: none; }
