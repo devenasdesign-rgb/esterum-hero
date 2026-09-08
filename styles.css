@@ -116,7 +116,7 @@ img { display: block; max-width: 100%; }
   align-items: center;
   gap: calc(20 * var(--u));
   color: var(--nav);
-  font-size: calc(18 * var(--u));
+  font-size: 16px;
   letter-spacing: .02em;
   white-space: nowrap;
 }
@@ -152,7 +152,7 @@ img { display: block; max-width: 100%; }
 }
 .has-sub:hover .submenu,
 .has-sub:focus-within .submenu { opacity: 1; visibility: visible; transform: none; }
-.submenu a { font-size: calc(15 * var(--u)); color: var(--ink); }
+.submenu a { font-size: 15px; color: var(--ink); }
 .submenu a::after { display: none; }
 .submenu a:hover { opacity: .6; }
 .submenu .soon { color: var(--muted); }
@@ -169,7 +169,7 @@ img { display: block; max-width: 100%; }
   display: flex;
   align-items: center;
   gap: calc(20 * var(--u));
-  font-size: calc(18 * var(--u));
+  font-size: 16px;
   color: var(--nav);
   white-space: nowrap;
 }
@@ -184,7 +184,7 @@ img { display: block; max-width: 100%; }
   background: var(--field);
   color: var(--ink);
   font: inherit;
-  font-size: calc(16 * var(--u));
+  font-size: 16px;
   border-radius: 0;
   transition: width .5s var(--easing), background .3s ease, border-color .3s ease;
   -webkit-appearance: none;
