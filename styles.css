@@ -482,7 +482,7 @@ img { display: block; max-width: 100%; }
   }
   .thumb { width: 100%; height: auto; aspect-ratio: 110 / 125; }
   .stage { grid-column: 1; width: 100%; height: auto; aspect-ratio: 350 / 360; }
-  .caption { font-size: 11px; padding: 11px 14px 10px; bottom: 0; }
+  .caption { font-size: 11px; padding: 11px 14px 10px; bottom: 30px; }
   .dots { margin-top: 12px; gap: 10px; }
   .dot { width: 7px; height: 7px; }
 
