@@ -1,0 +1,525 @@
+/* ==========================================================================
+   ESTÉRUM — главный экран, версия «сцена»
+   Та же система, что и в основной вёрстке: модуль макета --u, поля 60 px,
+   экран целиком помещается в окно.
+   ========================================================================== */
+
+:root {
+  --u: min(calc(100vw / 1440), calc(100vh / 900));
+
+  --bg:      #F2EEE6;
+  --bg-2:    #EAE4D9;   /* тень бумаги под сценой */
+  --ink:     #1C1C19;
+  --ink-2:   #231E19;
+  --muted:   #746F68;
+  --nav:     #6E6157;
+  --line:    #D8D1C7;
+  --field:   rgba(116, 111, 104, .22);
+  --on-dark: #F7F1EA;
+
+  --easing: cubic-bezier(.22, .68, .28, 1);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  font-size: calc(16 * var(--u));
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+:focus-visible { outline: 1px solid var(--muted); outline-offset: calc(4 * var(--u)); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip {
+  position: absolute; left: -9999px; top: 0; z-index: 50;
+  padding: 12px 18px; background: var(--ink); color: var(--on-dark);
+  font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+}
+.skip:focus { left: 12px; top: 12px; }
+
+/* заставка */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  transition: transform 1s cubic-bezier(.76, 0, .24, 1);
+}
+.curtain span {
+  font-family: "Prata", Georgia, serif;
+  font-size: calc(26 * var(--u));
+  letter-spacing: .42em;
+  text-indent: .42em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  opacity: 0;
+  transform: translateY(calc(8 * var(--u)));
+  transition: opacity .7s ease, transform .9s var(--easing);
+}
+.curtain.on span { opacity: 1; transform: none; }
+.curtain.lift { transform: translateY(-100%); }
+.curtain.lift span { opacity: 0; transition: opacity .35s ease; }
+
+.frame {
+  width: 100%;
+  height: calc(900 * var(--u));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ============================== шапка ============================== */
+
+.header { position: relative; z-index: 20; flex: none; }
+
+.header-in {
+  display: flex;
+  align-items: center;
+  gap: calc(30 * var(--u));
+  padding: calc(28 * var(--u)) 60px calc(26 * var(--u));
+}
+
+.wordmark {
+  font-family: "Prata", Georgia, serif;
+  font-size: calc(22 * var(--u));
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: calc(20 * var(--u));
+  color: var(--nav);
+  font-size: 16px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.nav a, .tool { position: relative; padding-bottom: 3px; }
+.nav a::after, .tool::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1px; background: currentColor;
+  transform: scaleX(0); transform-origin: right;
+  transition: transform .45s var(--easing);
+}
+.nav a:hover::after, .tool:hover::after { transform: scaleX(1); transform-origin: left; }
+.nav a:hover, .tool:hover { color: var(--ink); }
+
+.nav-item { position: relative; }
+.submenu {
+  position: absolute;
+  top: calc(100% + 18 * var(--u));
+  left: calc(-20 * var(--u));
+  min-width: calc(232 * var(--u));
+  padding: calc(18 * var(--u)) calc(20 * var(--u));
+  display: grid;
+  gap: calc(12 * var(--u));
+  background: #F8F5EF;
+  border: 1px solid var(--line);
+  box-shadow: 0 calc(26 * var(--u)) calc(50 * var(--u)) calc(-34 * var(--u)) rgba(52, 42, 30, .5);
+  opacity: 0; visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity .28s ease, transform .28s var(--easing), visibility .28s;
+}
+.has-sub:hover .submenu, .has-sub:focus-within .submenu { opacity: 1; visibility: visible; transform: none; }
+.submenu a { font-size: 15px; color: var(--ink); padding: 0; }
+.submenu a::after { display: none; }
+.submenu a:hover { opacity: .6; }
+.submenu .soon { color: var(--muted); }
+.submenu .soon i {
+  font-style: normal; font-size: calc(10 * var(--u));
+  letter-spacing: .18em; text-transform: uppercase; margin-left: calc(8 * var(--u));
+}
+
+.tools {
+  margin-left: auto;
+  display: flex; align-items: center;
+  gap: calc(20 * var(--u));
+  font-size: 16px;
+  color: var(--nav);
+  white-space: nowrap;
+}
+.count { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.search input {
+  width: calc(188 * var(--u));
+  height: calc(38 * var(--u));
+  padding: 0 calc(16 * var(--u));
+  border: 1px solid transparent;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit; font-size: 16px;
+  border-radius: 0;
+  transition: width .5s var(--easing), background .3s ease, border-color .3s ease;
+  -webkit-appearance: none; appearance: none;
+}
+.search input::placeholder { color: var(--nav); }
+.search input:focus {
+  width: calc(232 * var(--u));
+  background: #EAE5DC;
+  border-color: var(--line);
+  outline: none;
+}
+
+.burger {
+  display: none; margin-left: auto;
+  padding: 0; border: 0; background: none;
+  color: var(--nav); font: inherit; font-size: 13px; cursor: pointer;
+}
+
+.mobile-menu {
+  display: none;
+  position: fixed; inset: 0; z-index: 1;
+  align-content: start; gap: 24px;
+  padding: 84px 20px 40px;
+  background: var(--bg);
+  font-size: 18px; color: var(--nav);
+  overflow-y: auto; overscroll-behavior: contain;
+  animation: veil .38s var(--easing) both;
+}
+@keyframes veil { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+body.menu-open { overflow: hidden; }
+
+/* =============================== экран ============================== */
+
+.hero {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 560fr) minmax(0, 760fr);
+  column-gap: calc(60 * var(--u));
+  padding: calc(26 * var(--u)) 0 0 60px;
+  min-height: 0;
+}
+
+/* --------------------------- левая колонка -------------------------- */
+
+.copy { display: flex; flex-direction: column; align-items: flex-start; }
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  margin: calc(54 * var(--u)) 0 0;
+  color: var(--muted);
+  font-size: calc(11 * var(--u));
+  font-weight: 500;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+}
+.eyebrow .tick { width: calc(46 * var(--u)); height: 1px; background: var(--line); flex: none; }
+
+/* строчные вместо капса — засечный шрифт держит контраст и читается дороже */
+.title {
+  margin: calc(26 * var(--u)) 0 0;
+  font-family: "Prata", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: calc(98 * var(--u));
+  line-height: .97;
+  letter-spacing: -.032em;
+  color: var(--ink);
+}
+.title .ln { display: block; overflow: hidden; }
+.title .ln > span { display: block; white-space: nowrap; }
+.title .ln:last-child > span { padding-left: .06em; }
+
+.lede {
+  margin: calc(28 * var(--u)) 0 0;
+  width: calc(400 * var(--u));
+  font-weight: 300;
+  font-size: calc(17 * var(--u));
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: calc(26 * var(--u));
+  margin-top: calc(38 * var(--u));
+}
+
+.btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(12 * var(--u));
+  width: calc(252 * var(--u));
+  height: calc(53 * var(--u));
+  background: var(--ink);
+  color: var(--on-dark);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translate3d(var(--mx, 0px), var(--my, 0px), 0);
+  transition: transform .5s cubic-bezier(.16, .8, .3, 1);
+}
+.btn::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: #3A322B;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .55s cubic-bezier(.65, 0, .2, 1);
+}
+.btn i {
+  position: relative; z-index: 1; font-style: normal;
+  transition: transform .45s var(--easing);
+}
+.btn:hover::before { transform: scaleX(1); }
+.btn:hover .arrow { transform: translateX(calc(6 * var(--u))); }
+
+.quiet {
+  padding-bottom: calc(4 * var(--u));
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: calc(16 * var(--u));
+  transition: color .3s ease, border-color .3s ease;
+}
+.quiet:hover { color: var(--ink); border-color: var(--muted); }
+
+/* характеристики набраны как этикетка на коробке */
+.label-card {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  margin: calc(52 * var(--u)) 0 calc(52 * var(--u));
+  margin-top: auto;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+.label-card > div {
+  padding: calc(13 * var(--u)) calc(26 * var(--u)) calc(14 * var(--u));
+  border-left: 1px solid var(--line);
+}
+.label-card > div:first-child { padding-left: 0; border-left: 0; }
+.label-card dt {
+  font-size: calc(9.5 * var(--u));
+  font-weight: 500;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.label-card dd {
+  margin: calc(5 * var(--u)) 0 0;
+  font-family: "Prata", Georgia, serif;
+  font-size: calc(17 * var(--u));
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+/* ------------------------------- сцена ------------------------------ */
+
+.scene {
+  position: relative;
+  align-self: stretch;        /* кадр доходит ровно до края экрана */
+  min-height: 0;
+}
+
+.scene-img {
+  position: absolute;
+  inset: calc(-14 * var(--u)) calc(-14 * var(--u)) calc(-14 * var(--u)) calc(-14 * var(--u));
+  overflow: hidden;
+  background: var(--bg-2);
+  transform: translate3d(calc(var(--px, 0) * 9px), calc(var(--py, 0) * 9px), 0);
+  transition: transform .8s cubic-bezier(.16, .8, .3, 1);
+}
+.scene-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 62% 54%;
+  animation: breathe 30s ease-in-out infinite alternate;
+}
+@keyframes breathe {
+  from { transform: scale(1); }
+  to   { transform: scale(1.045); }
+}
+
+/* подпись кадра — вертикально по левому краю сцены */
+.scene-mark {
+  position: absolute;
+  left: calc(18 * var(--u));
+  top: calc(28 * var(--u));
+  margin: 0;
+  writing-mode: vertical-rl;
+  font-size: calc(10 * var(--u));
+  font-weight: 500;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: #453A31;
+  mix-blend-mode: multiply;
+}
+
+/* четыре свечи лежат на кадре, как отпечатки на столе */
+.tray {
+  position: absolute;
+  left: calc(34 * var(--u));
+  bottom: calc(52 * var(--u));
+  display: flex;
+  gap: calc(14 * var(--u));
+}
+.card {
+  position: relative;
+  display: block;
+  width: calc(118 * var(--u));
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.card .shot {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: calc(142 * var(--u));
+  padding: calc(7 * var(--u));
+  overflow: hidden;
+  background: #F6F2EB;
+  box-shadow: 0 calc(18 * var(--u)) calc(34 * var(--u)) calc(-22 * var(--u)) rgba(40, 30, 20, .55);
+  transition: transform .7s var(--easing), box-shadow .7s var(--easing);
+}
+.card .shot img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  will-change: transform;
+  transition: transform 1.2s var(--easing), filter .6s ease;
+  filter: saturate(.94);
+}
+.card .shot::after {
+  content: "";
+  position: absolute; inset: 0;
+  border: 1px solid transparent;
+  transition: border-color .5s ease;
+}
+.card .name {
+  display: block;
+  margin-top: calc(11 * var(--u));
+  font-size: calc(9.5 * var(--u));
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #3D3229;
+  mix-blend-mode: multiply;
+  transition: opacity .5s ease;
+  opacity: .6;
+}
+.card:hover .shot { transform: translateY(calc(-8 * var(--u))); }
+.card:hover .shot img { transform: scale(1.05); }
+.card:hover .name { opacity: 1; }
+
+.card[aria-selected="true"] .shot {
+  transform: translateY(calc(-14 * var(--u)));
+  box-shadow: 0 calc(26 * var(--u)) calc(44 * var(--u)) calc(-24 * var(--u)) rgba(40, 30, 20, .62);
+}
+.card[aria-selected="true"] .shot::after { border-color: var(--ink); }
+.card[aria-selected="true"] .name { opacity: 1; color: var(--ink); }
+
+/* ==================== появление первого экрана ====================== */
+
+.js .reveal { opacity: 0; }
+.js .title .ln > span { transform: translateY(108%); filter: blur(7px); }
+.js .eyebrow .tick { width: 0; }
+.js .scene-img { clip-path: inset(0 0 0 100%); }
+.js .scene-mark { opacity: 0; }
+.js .card { opacity: 0; transform: translateY(calc(26 * var(--u))); }
+
+.ready .reveal { animation: rise .95s var(--easing) both; animation-delay: var(--d, 0s); }
+.ready .title .ln > span {
+  transition: transform 1.1s var(--easing), filter 1.25s ease;
+  transition-delay: var(--d, 0s);
+  transform: none; filter: blur(0);
+}
+.ready .eyebrow .tick { transition: width .9s var(--easing) .15s; width: calc(46 * var(--u)); }
+.ready .scene-img { transition: clip-path 1.4s var(--easing) .15s; clip-path: inset(0 0 0 0); }
+.ready .scene-mark { transition: opacity .9s ease 1.1s; opacity: 1; }
+.ready .card {
+  transition: opacity .9s ease, transform 1s var(--easing);
+  transition-delay: var(--d, 0s);
+  opacity: 1; transform: none;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(calc(18 * var(--u))); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ============================== мобильный =========================== */
+
+@media (max-width: 900px) {
+  :root { --u: 1px; }
+
+  body { display: block; }
+  .frame { width: 100%; height: auto; overflow: visible; }
+
+  .mobile-menu { display: grid; }
+  .header-in { position: relative; z-index: 2; gap: 14px; padding: 18px 20px; }
+  .nav { display: none; }
+  .tools { gap: 14px; font-size: 13px; }
+  .tools .search, .tools .tool:first-of-type { display: none; }
+  .burger { display: block; margin-left: 0; }
+  .wordmark { font-size: 17px; }
+
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 0 0 40px;
+    row-gap: 0;
+  }
+
+  .scene {
+    order: -1;
+    margin: 0;
+    height: 78vw;
+    max-height: 460px;
+  }
+  .scene-img { inset: 0; transform: none; }
+  .scene-mark { left: 14px; top: 16px; font-size: 9px; }
+  .tray { left: 16px; right: 16px; bottom: 16px; gap: 8px; }
+  .card { width: 100%; }
+  .card .shot { height: 84px; }
+  .card .name { font-size: 8px; letter-spacing: .16em; margin-top: 7px; }
+
+  .copy { padding: 0 20px; }
+  .eyebrow { margin-top: 30px; font-size: 10px; }
+  .eyebrow .tick { width: 32px; }
+  .title { font-size: clamp(38px, 11.6vw, 50px); margin-top: 16px; }
+  .lede { width: auto; font-size: 16px; line-height: 1.5; margin-top: 18px; }
+  .actions { margin-top: 26px; flex-direction: column; align-items: stretch; gap: 18px; width: 100%; }
+  .btn { width: 100%; height: 58px; }
+  .quiet { align-self: center; font-size: 14px; }
+  .label-card { width: 100%; margin-top: 30px; }
+  .label-card > div { padding: 12px 14px 13px; }
+  .label-card dd { font-size: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  .curtain { display: none; }
+  .js .reveal, .js .card { opacity: 1; transform: none; }
+  .js .title .ln > span { transform: none; filter: none; }
+  .js .scene-img { clip-path: none; transform: none; }
+  .js .scene-mark { opacity: 1; }
+  .js .eyebrow .tick { width: calc(46 * var(--u)); }
+}
